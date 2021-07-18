@@ -1,0 +1,24 @@
+{
+    "name": "zappmonnkey/react_app",
+    "description": "A base app with routing, PHP DI and database connection",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Mark Freese",
+            "homepage": "https://zappmonkey.com",
+            "email": "mark@zappmonkey.com"
+        }
+    ],
+    "require": {
+        "react/react": "^1.2",
+        "nikic/fast-route": "^1.3",
+        "php-di/php-di": "^6.3",
+        "monolog/monolog": "^2.3",
+        "drift/dbal": "^0.1.2",
+        "react/mysql": "^0.5.4",
+        "clue/reactphp-sqlite": "^1.1"
+    },
+    "autoload": {
+        "psr-4": {"ReactApp\\": "src/"}
+    }
+}
