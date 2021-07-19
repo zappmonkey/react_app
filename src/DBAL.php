@@ -2,7 +2,9 @@
 
 namespace ReactApp;
 
+use Doctrine\DBAL\Platforms\AbstractPlatform;
 use Doctrine\DBAL\Platforms\MySqlPlatform;
+use Doctrine\DBAL\Platforms\SqlitePlatform;
 use Drift\DBAL\Connection;
 use Drift\DBAL\Driver\Mysql\MysqlDriver;
 use Drift\DBAL\Driver\SQLite\SQLiteDriver;
@@ -29,20 +31,21 @@ class DBAL
     public function addConfig(DBALConfig $config)
     {
         self::$config = $config;
-        $mysqlPlatform = new MySqlPlatform();
         switch ($config->getDriver()) {
             case DBALConfig::DRIVER_SQLITE;
+                $platform = new SqlitePlatform();
                 $driver = new SQLiteDriver(self::$loop);
                 break;
             case DBALConfig::DRIVER_MYSQL;
             default:
+                $platform = new MySqlPlatform();
                 $driver = new MysqlDriver(self::$loop);
         }
         $credentials = new Credentials(...$config->get());
         self::$connection = Connection::createConnected(
             $driver,
             $credentials,
-            $mysqlPlatform
+            $platform
         );
     }
     public function connection(): Connection
