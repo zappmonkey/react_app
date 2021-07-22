@@ -10,6 +10,7 @@ use Drift\DBAL\Driver\Mysql\MysqlDriver;
 use Drift\DBAL\Driver\SQLite\SQLiteDriver;
 use Drift\DBAL\Credentials;
 use React\EventLoop\LoopInterface;
+use ZAPPStudio\API\Base\Model;
 
 class DBAL
 {
@@ -47,6 +48,8 @@ class DBAL
             $credentials,
             $platform
         );
+        Model::setConnection(self::$connection);
+
     }
     public function connection(): Connection
     {
