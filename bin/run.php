@@ -6,8 +6,8 @@ use React\Http\Message\Response;
 
 $app = new ReactApp\Base();
 
-$config = new \ReactApp\DBALConfig(\ReactApp\DBALConfig::DRIVER_SQLITE, 'dev.sqlite');
-$dbal = $app->getContainer()->make(\ReactApp\DBAL::class, [
+$config = new \ReactApp\DBAL\Config(\ReactApp\DBAL\Config::DRIVER_SQLITE, 'dev.sqlite');
+$dbal = $app->getContainer()->make(\ReactApp\DBAL\DBAL::class, [
     'config' => $config,
 ]);
 $app->setDBAL($dbal);

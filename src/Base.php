@@ -9,6 +9,7 @@ use React\EventLoop\LoopInterface;
 use React\Http\Server;
 use React\EventLoop\Loop;
 use FastRoute\Dispatcher\GroupCountBased;
+use ReactApp\DBAL\DBAL;
 
 class Base
 {

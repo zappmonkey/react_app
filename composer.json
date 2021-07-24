@@ -16,7 +16,9 @@
         "monolog/monolog": "^2.3",
         "drift/dbal": "^0.1.2",
         "react/mysql": "^0.5.4",
-        "clue/reactphp-sqlite": "^1.1"
+        "clue/reactphp-sqlite": "^1.1",
+        "twig/twig": "^3.0",
+        "ext-json": "*"
     },
     "autoload": {
         "psr-4": {"ReactApp\\": "src/"}

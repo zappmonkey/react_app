@@ -1,8 +1,10 @@
 <?php
 
-namespace ReactApp;
+namespace ReactApp\DBAL;
 
+use Doctrine\DBAL\Platforms\AbstractPlatform;
 use Doctrine\DBAL\Platforms\MySqlPlatform;
+use Doctrine\DBAL\Platforms\SQLitePlatform;
 use Drift\DBAL\Connection;
 use Drift\DBAL\Driver\Mysql\MysqlDriver;
 use Drift\DBAL\Driver\SQLite\SQLiteDriver;
@@ -12,13 +14,13 @@ use React\EventLoop\LoopInterface;
 class DBAL
 {
     private static ?Connection $connection = null;
-    private static ?LoopInterface $loop = null;
-    private static ?DBALConfig $config = null;
+    private static ?LoopInterface $loop   = null;
+    private static ?Config        $config = null;
 
     /**
      * DBAL constructor.
      */
-    public function __construct(LoopInterface $loop, ?DBALConfig $config = null)
+    public function __construct(LoopInterface $loop, ?Config $config = null)
     {
         self::$loop = $loop;
         if ($config !== null) {
@@ -26,24 +28,26 @@ class DBAL
         }
     }
 
-    public function addConfig(DBALConfig $config)
+    public function addConfig(Config $config)
     {
         self::$config = $config;
-        $mysqlPlatform = new MySqlPlatform();
         switch ($config->getDriver()) {
-            case DBALConfig::DRIVER_SQLITE;
+            case Config::DRIVER_SQLITE;
+                $platform = new SQLitePlatform();
                 $driver = new SQLiteDriver(self::$loop);
                 break;
-            case DBALConfig::DRIVER_MYSQL;
+            case Config::DRIVER_MYSQL;
             default:
+                $platform = new MySqlPlatform();
                 $driver = new MysqlDriver(self::$loop);
         }
         $credentials = new Credentials(...$config->get());
         self::$connection = Connection::createConnected(
             $driver,
             $credentials,
-            $mysqlPlatform
+            $platform
         );
+        Model::setConnection(self::$connection);
     }
     public function connection(): Connection
     {

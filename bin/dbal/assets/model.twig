@@ -1,0 +1,58 @@
+<?php
+
+namespace {{ namespace }};
+
+use ReactApp\DBAL\Model;
+
+class {{ model.name|db_to_camel }} extends Model
+{
+    protected string $_table = '{{ model.name }}';
+    protected string $_model = self::class;
+
+{% for column, info in model.columns %}
+{% set nullable = (column == model.primary|first or (info.options.notnull is defined and info.options.notnull == false)) %}
+    protected {% if nullable %}?{% endif %}{{ info.type|to_php_type }} ${{ column }}{% if nullable %} = null{% endif %};
+{% endfor %}
+
+    public function __construct(?int $id = null)
+    {
+        parent::__construct(json_decode('{{ model|json_encode|raw }}', true));
+        if ($id !== null) {
+            $this->get($id);
+        }
+    }
+
+    public function getId(): ?int
+    {
+        return $this->{{ model.primary|first }};
+    }
+
+{% for column, info in model.columns %}
+{% set nullable = (column == model.primary|first or (info.options.notnull is defined and info.options.notnull == false)) %}
+    public function get{{ column|db_to_camel }}(): {% if nullable %}?{% endif %}{{ info.type|to_php_type }}
+    {
+        return $this->{{ column }};
+    }
+
+{% if column != model.primary|first %}
+{% set nullable = (column == model.primary|first or (info.options.notnull is defined and info.options.notnull == false)) %}
+    public function set{{ column|db_to_camel }}({% if nullable %}?{% endif %}{{ info.type|to_php_type }} ${{ column }}): self
+    {
+        $this->{{ column }} = ${{ column }};
+        return $this;
+    }
+{% endif %}
+{% endfor %}
+
+{% if model.relations.many_to_many is not empty %}
+{% for relation in model.relations.many_to_many %}
+{% set many_to_many = model.name|many_to_many(relation) %}
+    public function get{{ relation|db_to_camel }}s(): []{{ relation|db_to_camel }}
+    {
+        ${{ relation }} = [];
+
+        return ${{ relation }};
+    }
+{% endfor %}
+{% endif %}
+}
