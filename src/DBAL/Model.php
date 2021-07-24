@@ -125,7 +125,7 @@ abstract class Model implements \JsonSerializable
         return $data;
     }
 
-    private static Connection $connection;
+    protected static Connection $connection;
     public static function setConnection(Connection $connection)
     {
         self::$connection = $connection;

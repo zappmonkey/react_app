@@ -60,6 +60,7 @@ $twig->addFilter(new TwigFilter('many_to_many', 'manyToMany'));
 $connection = $app->getContainer()->get(Connection::class);
 $schema = new Schema();
 $dbalDirectory = $appRoot . 'config/' . $dbalConfig['model']['config'] . '/';
+$manyToManyTables = [];
 foreach (scandir($dbalDirectory) as $file) {
     if (strlen($file) < 5 || substr($file, -5) !== '.yaml') {
         continue;
@@ -67,7 +68,16 @@ foreach (scandir($dbalDirectory) as $file) {
     $tableConfig = Yaml::parseFile($dbalDirectory . $file);
     echo "Creating table {$tableConfig['name']}\n";
     $table = $schema->createTable($tableConfig['name']);
+    if (!empty($tableConfig['relations']['many_to_one'])) {
+        foreach ($tableConfig['relations']['many_to_one'] as $relation) {
+            $column = $relation . '_id';
+            if (empty($tableConfig['columns'][$column])) {
+                $tableConfig['columns'][$column] = ['type' => 'integer', 'options' => ['unsigned' => true]];
+            }
+        }
+    }
     foreach ($tableConfig['columns'] as $column => $details) {
+        echo "add column {$column} to {$tableConfig['name']} \n";
         $table->addColumn($column, $details['type'], $details['options'] ?? []);
     }
     if ($tableConfig['primary'] ?? false) {
@@ -79,6 +89,31 @@ foreach (scandir($dbalDirectory) as $file) {
     echo "Creating model {$tableConfig['name']}\n";
     $model = $twig->render('model.twig', ['namespace' => $dbalConfig['namespace'], 'model' => $tableConfig]);
     file_put_contents(dbToCamel($modelDir . dbToCamel($tableConfig['name']) . '.php'), $model);
+
+    if (!empty($tableConfig['relations']['many_to_one'])) {
+        foreach ($tableConfig['relations']['many_to_one'] as $relation) {
+            $column = $relation . '_id';
+            $table->addForeignKeyConstraint($relation, [$column], [$tableConfig['name'] . '_id']);
+        }
+    }
+
+    // Check for many to many
+    if (!empty($tableConfig['relations']['many_to_many'])) {
+        foreach ($tableConfig['relations']['many_to_many'] as $relation) {
+            $tableName = manyToMany($tableConfig['name'], $relation);
+            if (in_array($tableName, $manyToManyTables)) {
+                continue;
+            }
+            $manyToManyTables[] = $tableName;
+            $key1 = $relation . '_id';
+            $key2 = $tableConfig['name'] . '_id';
+            $relationTable = $schema->createTable($tableName);
+            $relationTable->addColumn($key1, 'integer', []);
+            $relationTable->addColumn($key2, 'integer', []);
+            $relationTable->setPrimaryKey([$key1, $key2]);
+            echo "Created many_to_many {$tableName}\n";
+        }
+    }
 }
 
 $connection->executeSchema($schema)
@@ -92,21 +127,22 @@ $connection->executeSchema($schema)
         Loop::stop();
     });
 
-$queryBuilder = $connection->createQueryBuilder();
-$queryBuilder
-    ->select('*')
-    ->from('group', 'g')
-    ->innerJoin('g', 'group_of_user', 'gu', 'g.group_id = gu.group_id')
-    ->where('gu.user_id = ?')
-$test = $connection
-    ->query($connection->createQueryBuilder())
-    ->select('*')
-    ->from('test', 't')
-    ->where($queryBuilder->expr()->orX(
-        $queryBuilder->expr()->eq('t.id', '?'),
-        $queryBuilder->expr()->eq('t.id', '?')
-    ))
-    ->setParameters(['1', '2']);
+//$queryBuilder = $connection->createQueryBuilder();
+//$queryBuilder
+//    ->select('*')
+//    ->from('group', 'g')
+//    ->innerJoin('g', 'group_of_user', 'gu', 'g.group_id = gu.group_id')
+//    ->where('gu.user_id = ?')
+//    ->setParameters([1]);
+//$test = $connection
+//    ->query($queryBuilder)
+//    ->then(function(array $groups) {
+//        $items = [];
+//        foreach ($groups as $group) {
+//            $items[] = (new Group())->populate($group);
+//        }
+//        return $items;
+//    });
 
 //$User = new \ZAPPStudio\API\Model\User();
 //$User->get(1)
