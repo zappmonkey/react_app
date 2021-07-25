@@ -1,7 +1,8 @@
 <?php
 
 namespace ReactApp;
-
+use Closure;
+use ReflectionFunction;
 use LogicException;
 use FastRoute\Dispatcher;
 use FastRoute\Dispatcher\GroupCountBased;
@@ -29,6 +30,7 @@ final class Router
      */
     public function __invoke(ServerRequestInterface $request)
     {
+        $this->container->set(ServerRequestInterface::class, $request);
         $route = $this->dispatcher->dispatch($request->getMethod(), $request->getUri()->getPath());
         switch ($route[0]) {
             case Dispatcher::NOT_FOUND:
@@ -38,19 +40,23 @@ final class Router
             case Dispatcher::FOUND:
                 $controller = $route[1];
                 $parameters = $route[2];
-                if ($controller instanceof \Closure) {
-                    $reflect = new \ReflectionFunction($controller);
-                    $args = [];
-                    foreach ($reflect->getParameters() as $parameter) {
-                        if ($this->container->has($parameter->getType()->getName())) {
-                            $args[] = $this->container->get($parameter->getType()->getName());
-                        } else {
-                            $args[] = $parameters[$parameter->getName()] ?? null;
-                        }
+                $closure = $controller;
+                if (!($controller instanceof Closure)) {
+                    $closure = Closure::fromCallable($controller);
+                }
+                $reflect = new ReflectionFunction($closure);
+                $args = [];
+                foreach ($reflect->getParameters() as $parameter) {
+                    if ($this->container->has($parameter->getType()->getName())) {
+                        $args[] = $this->container->get($parameter->getType()->getName());
+                    } else {
+                        $args[] = $parameters[$parameter->getName()] ?? null;
                     }
+                }
+                if ($controller instanceof Closure) {
                     return $route[1](...$args);
                 }
-                $this->container->call($controller, $parameters);
+                return $this->container->call($controller, $args);
         }
         throw new LogicException('Something wrong with routing');
     }
