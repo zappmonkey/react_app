@@ -13,6 +13,8 @@ use ReactApp\DBAL\DBAL;
 
 class Base
 {
+    const APP_ROOT = 'app_root';
+
     private LoopInterface $loop;
     private Routes $routes;
     private ContainerInterface $container;

@@ -127,78 +127,17 @@ $connection->executeSchema($schema)
         Loop::stop();
     });
 
-//$queryBuilder = $connection->createQueryBuilder();
-//$queryBuilder
-//    ->select('*')
-//    ->from('group', 'g')
-//    ->innerJoin('g', 'group_of_user', 'gu', 'g.group_id = gu.group_id')
-//    ->where('gu.user_id = ?')
-//    ->setParameters([1]);
-//$test = $connection
-//    ->query($queryBuilder)
-//    ->then(function(array $groups) {
-//        $items = [];
-//        foreach ($groups as $group) {
-//            $items[] = (new Group())->populate($group);
-//        }
-//        return $items;
-//    });
-
-//$User = new \ZAPPStudio\API\Model\User();
-//$User->get(1)
-//    ->then(function() use ($User) {
-//        echo(print_r(['loaded', $User->getId()], true));
-//        $User->delete()->then(function($result) use ($User) {
-//            echo(print_r(['deleted', $User->getId()], true));
-//        });
-//    });
-//$User->findBy(['email' => 'mark@zz1tis.nl'])
-//    ->then(function(array $users) {
-//        echo(print_r($users, true));
-////        Loop::stop();
-//    }, function($error) {
-//        echo "unable to find user\n";
-////        Loop::stop();
-//    });
-//$User->findOneBy(['email' => 'mark@zz1tis.nl'])
-//    ->then(function(\ZAPPStudio\API\Model\User $user) {
-//        echo(print_r($user, true));
-////        Loop::stop();
-//    }, function($error) {
-//        echo "unable to find user\n";
-////        Loop::stop();
-//    });
-//$User->setEmail('mark@zz1tis.nl');
-//$User->setFirstname('Mark');
-//$User->setLastname("Freese");
-//$User->flush()->then(function($result) {
-//    echo(print_r($result, true));
-//}, function($error) {
-//    echo(print_r($error, true));
-//});
-//
-//$user = $schema->createTable("user");
-//$user->addColumn("user_id", "integer", ["unsigned" => true]);
-//$user->addColumn("email", "string", ["length" => 256]);
-//$user->addColumn("firstname", "string", ["length" => 256]);
-//$user->addColumn("lastname", "string", ["length" => 256]);
-//$user->addColumn("avatar", "string", ["length" => 256, 'notnull' => false]);
-//$user->addColumn("password", "string", ["length" => 256, 'notnull' => false]);
-//$user->addColumn("status", "string", ["length" => 256, 'default' => 'ACTIVE']);
-//$user->addColumn("token", "string", ["length" => 1024, 'notnull' => false]);
-//$user->addColumn("created", "datetime", ["default" => "CURRENT_TIMESTAMP"]);
-//$user->addColumn("modified", "datetime", ["default" => "CURRENT_TIMESTAMP"]);
-//
-//$user->setPrimaryKey(["user_id"]);
-//$user->addUniqueIndex(["email"]);
-////$schema->createSequence("my_table_seq");
-//
-////$myForeign = $schema->createTable("my_foreign");
-////$myForeign->addColumn("id", "integer");
-////$myForeign->addColumn("user_id", "integer");
-////$myForeign->addForeignKeyConstraint($user, array("user_id"), array("user_id"), array("onUpdate" => "CASCADE"));
-//
-//$connection->executeSchema($schema);
+$authentication = new \ZAPPStudio\API\Handler\Authentication($app->getContainer());
+$User = new \ZAPPStudio\API\Model\User();
+$User->setEmail('mark@zappmonkey.com');
+$User->setFirstname('Mark');
+$User->setLastname("Freese");
+$User->setPassword($authentication->hashPassword("password"));
+$User->flush()->then(function($result) {
+    echo(print_r($result, true));
+}, function($error) {
+    echo(print_r($error, true));
+});
 
 function dbToCamel(string $db, bool $firstCharacterUppercase = true)
 {

@@ -21,9 +21,10 @@ class Container
     public static function get(?LoopInterface $loop = null): ContainerInterface
     {
         if (self::$container === null) {
+            $appRoot = __DIR__ . '/../../../../';
             $builder = new ContainerBuilder;
             $log = new Logger('my_react');
-            $log->pushHandler(new StreamHandler(__DIR__ . '../app.log', Logger::WARNING));
+            $log->pushHandler(new StreamHandler($appRoot . 'data/app.log', Logger::WARNING));
             $builder->addDefinitions([
                 RouteParser::class     => create(Std::class),
                 DataGenerator::class   => create(GroupCountBased::class),
@@ -31,6 +32,7 @@ class Container
                 LoopInterface::class   => $loop,
             ]);
             self::$container = $builder->build();
+            self::$container->set(Base::APP_ROOT, $appRoot);
         }
         return self::$container;
     }

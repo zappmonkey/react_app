@@ -18,7 +18,8 @@
         "react/mysql": "^0.5.4",
         "clue/reactphp-sqlite": "^1.1",
         "twig/twig": "^3.0",
-        "ext-json": "*"
+        "ext-json": "*",
+        "firebase/php-jwt": "^5.4"
     },
     "autoload": {
         "psr-4": {"ReactApp\\": "src/"}

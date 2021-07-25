@@ -33,6 +33,7 @@ abstract class Model implements \JsonSerializable
                 } else {
                     $this->populate($result);
                 }
+                return $this;
             });
     }
 
