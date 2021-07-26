@@ -1,8 +1,6 @@
 <?php
 
-
 namespace ReactApp\DBAL;
-
 
 use Drift\DBAL\Connection;
 use Drift\DBAL\Result;
@@ -108,6 +106,25 @@ abstract class Model implements \JsonSerializable
             }
         }
         return $this;
+    }
+
+    public function list()
+    {
+        $queryBuilder = self::$connection->createQueryBuilder();
+        $queryBuilder
+            ->select('*')
+            ->from($this->_table, 'm');
+        return self::$connection
+            ->query($queryBuilder)
+            ->then(function(Result $results) {
+                $items = [];
+                if ($results->fetchCount() > 0) {
+                    foreach ($results->fetchAllRows() as $result) {
+                        $items[] = (new $this->_model())->populate($result);
+                    }
+                }
+                return $items;
+            });
     }
 
     public function jsonSerialize(): array

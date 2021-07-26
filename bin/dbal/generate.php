@@ -134,9 +134,9 @@ $User->setFirstname('Mark');
 $User->setLastname("Freese");
 $User->setPassword($authentication->hashPassword("password"));
 $User->flush()->then(function($result) {
-    echo(print_r($result, true));
+//    echo(print_r($result, true));
 }, function($error) {
-    echo(print_r($error, true));
+//    echo(print_r($error, true));
 });
 
 function dbToCamel(string $db, bool $firstCharacterUppercase = true)
