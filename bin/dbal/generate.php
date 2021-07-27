@@ -135,18 +135,6 @@ $connection->executeSchema($schema)
         Loop::stop();
     });
 
-$authentication = new \ZAPPStudio\API\Handler\Authentication($app->getContainer());
-$User = new \ZAPPStudio\API\Model\User();
-$User->setEmail('mark@zappmonkey.com');
-$User->setFirstname('Mark');
-$User->setLastname("Freese");
-$User->setPassword($authentication->hashPassword("password"));
-$User->flush()->then(function($result) {
-//    echo(print_r($result, true));
-}, function($error) {
-//    echo(print_r($error, true));
-});
-
 function dbToCamel(string $db, bool $firstCharacterUppercase = true)
 {
     if (preg_match('/[A-Z]/', $db)) {
