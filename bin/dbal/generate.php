@@ -40,6 +40,14 @@ $modelDir = $appRoot . 'src/' . $dbalConfig['model']['dir'] . '/';
 if (!file_exists($modelDir)) {
     echo "Creating model directory \n";
     mkdir($modelDir, 0777, true);
+} else {
+    echo "Removeing models from model directory \n";
+    foreach (scandir($modelDir) as $file) {
+        if (is_file($modelDir.$file)) {
+            echo "- Removeing model {$file} \n";
+            unlink($modelDir.$file);
+        }
+    }
 }
 
 $dbal = $app->getContainer()->make(DBAL::class, [
@@ -77,7 +85,7 @@ foreach (scandir($dbalDirectory) as $file) {
         }
     }
     foreach ($tableConfig['columns'] as $column => $details) {
-        echo "add column {$column} to {$tableConfig['name']} \n";
+        echo "- add column {$column} to {$tableConfig['name']} \n";
         $table->addColumn($column, $details['type'], $details['options'] ?? []);
     }
     if ($tableConfig['primary'] ?? false) {
