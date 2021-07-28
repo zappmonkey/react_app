@@ -34,7 +34,6 @@ final class Router
      */
     public function __invoke(ServerRequestInterface $request)
     {
-        $this->container->set(ServerRequestInterface::class, $request);
         try {
             $route = $this->dispatcher->dispatch($request->getMethod(), $request->getUri()->getPath());
             switch ($route[0]) {
@@ -54,6 +53,8 @@ final class Router
                     foreach ($reflect->getParameters() as $parameter) {
                         if ($this->container->has($parameter->getType()->getName())) {
                             $args[] = $this->container->get($parameter->getType()->getName());
+                        } else if ($parameter->getType()->getName() === ServerRequestInterface::class) {
+                            $args[] = $request;
                         } else {
                             $args[] = $parameters[$parameter->getName()] ?? null;
                         }
