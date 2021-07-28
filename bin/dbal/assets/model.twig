@@ -3,6 +3,7 @@
 namespace {{ namespace }};
 
 use ReactApp\DBAL\Model;
+use Drift\DBAL\Result;
 use React\Promise\PromiseInterface;
 
 class {{ model.name|db_to_camel }} extends Model
@@ -59,10 +60,12 @@ class {{ model.name|db_to_camel }} extends Model
             ->setParameters([$this->getId()]);
         return self::$connection
             ->query($queryBuilder)
-            ->then(function(array ${{ relation }}s) {
+            ->then(function(Result ${{ relation }}s) {
                 $items = [];
-                foreach (${{ relation }}s as ${{ relation }}) {
-                    $items[] = (new {{ relation|db_to_camel }}())->populate(${{ relation }});
+                if (${{ relation }}s->fetchCount() > 0) {
+                    foreach (${{ relation }}s->fetchAllRows() as ${{ relation }}) {
+                        $items[] = (new {{ relation|db_to_camel }}())->populate(${{ relation }});
+                    }
                 }
                 return $items;
             });

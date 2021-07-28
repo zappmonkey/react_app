@@ -39,7 +39,7 @@ final class Router
             $route = $this->dispatcher->dispatch($request->getMethod(), $request->getUri()->getPath());
             switch ($route[0]) {
                 case Dispatcher::NOT_FOUND:
-                    return new Response(404, ['Content-Type' => 'text/plain'], 'Not found');
+                    return new Response(404, ['Content-Type' => 'text/plain'], 'Not found!');
                 case Dispatcher::METHOD_NOT_ALLOWED:
                     return new Response(405, ['Content-Type' => 'text/plain'], 'Method not allowed');
                 case Dispatcher::FOUND:
@@ -67,7 +67,7 @@ final class Router
         } catch (ServerException $e) {
             // Catch server exceptions and return as json
             $this->logger->error($e->getTitle(), $e->jsonSerialize());
-            return new Response($e->getCode(), ['Content-Type' => 'application/json'], json_encode($e));
+            return $e->response();
         } catch (\Throwable $e) {
             // Catch server exceptions and return as json
             $this->logger->error($e->getMessage(), $e->getTrace());

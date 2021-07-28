@@ -12,6 +12,7 @@ namespace ReactApp\Exception;
 
 use Exception;
 use Psr\Http\Message\ServerRequestInterface;
+use React\Http\Message\Response;
 use Throwable;
 
 class ServerException extends Exception implements \JsonSerializable
@@ -73,6 +74,11 @@ class ServerException extends Exception implements \JsonSerializable
     {
         $this->description = $description;
         return $this;
+    }
+
+    public function response()
+    {
+        return new Response($this->getCode(), ['Content-Type' => 'application/json'], json_encode($this));
     }
 
     public function jsonSerialize()

@@ -43,14 +43,16 @@ abstract class Model implements \JsonSerializable
                 $this->jsonSerialize()
             )->then(function(Result $result) {
                 $this->{reset($this->_structure['primary'])} = $result->getLastInsertedId();
-                return $result;
+                return $this;
             });
         }
         return self::$connection->update(
             $this->_table,
             [reset($this->_structure['primary']) => $this->getId()],
             $this->jsonSerialize()
-        );
+        )->then(function(Result $result) {
+            return $this;
+        });
     }
 
     public function delete(): PromiseInterface
