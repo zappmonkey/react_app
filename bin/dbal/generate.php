@@ -78,7 +78,8 @@ foreach (scandir($dbalDirectory) as $file) {
     $table = $schema->createTable($tableConfig['name']);
     if (!empty($tableConfig['relations']['many_to_one'])) {
         foreach ($tableConfig['relations']['many_to_one'] as $relation) {
-            $column = $relation . '_id';
+            $relationTable = $relation['name'] ?? $relation['table'];
+            $column = $relationTable . '_id';
             if (empty($tableConfig['columns'][$column])) {
                 $tableConfig['columns'][$column] = ['type' => 'integer', 'options' => ['unsigned' => true]];
             }
@@ -94,26 +95,25 @@ foreach (scandir($dbalDirectory) as $file) {
     foreach ($tableConfig['unique'] ?? [] as $unique) {
         $table->addUniqueIndex($unique);
     }
-    echo "Creating model {$tableConfig['name']}\n";
-    $model = $twig->render('model.twig', ['namespace' => $dbalConfig['namespace'], 'model' => $tableConfig]);
-    file_put_contents(dbToCamel($modelDir . dbToCamel($tableConfig['name']) . '.php'), $model);
 
     if (!empty($tableConfig['relations']['many_to_one'])) {
         foreach ($tableConfig['relations']['many_to_one'] as $relation) {
-            $column = $relation . '_id';
-            $table->addForeignKeyConstraint($relation, [$column], [$tableConfig['name'] . '_id']);
+            $relationTable = $relation['name'] ?? $relation['table'];
+            $column = $relationTable . '_id';
+            $table->addForeignKeyConstraint($relation['table'], [$column], [$tableConfig['name'] . '_id']);
         }
     }
 
     // Check for many to many
     if (!empty($tableConfig['relations']['many_to_many'])) {
         foreach ($tableConfig['relations']['many_to_many'] as $relation) {
-            $tableName = manyToMany($tableConfig['name'], $relation);
+            $relationTable = $relation['name'] ?? $relation['table'];
+            $tableName = manyToMany($tableConfig['name'], $relationTable);
             if (in_array($tableName, $manyToManyTables)) {
                 continue;
             }
             $manyToManyTables[] = $tableName;
-            $key1 = $relation . '_id';
+            $key1 = $relationTable . '_id';
             $key2 = $tableConfig['name'] . '_id';
             $relationTable = $schema->createTable($tableName);
             $relationTable->addColumn($key1, 'integer', []);
@@ -122,6 +122,10 @@ foreach (scandir($dbalDirectory) as $file) {
             echo "Created many_to_many {$tableName}\n";
         }
     }
+
+    echo "Creating model {$tableConfig['name']}\n";
+    $model = $twig->render('model.twig', ['namespace' => $dbalConfig['namespace'], 'model' => $tableConfig]);
+    file_put_contents(dbToCamel($modelDir . dbToCamel($tableConfig['name']) . '.php'), $model);
 }
 
 $connection->executeSchema($schema)

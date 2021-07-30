@@ -47,67 +47,72 @@ class {{ model.name|db_to_camel }} extends Model
 {% endfor %}
 {% if model.relations.many_to_many is not empty %}
 
-{% for relation in model.relations.many_to_many %}
-{% set many_to_many = model.name|many_to_many(relation) %}
-    public function get{{ relation|db_to_camel }}s(): PromiseInterface
+{% for relation in model.relations.many_to_many %}{% set relation_table = relation.name|default(relation.table) %}{% set many_to_many = model.name|many_to_many(relation_table) %}
+
+    public function get{{ relation_table|db_to_camel }}s(): PromiseInterface
     {
         $queryBuilder = self::$connection->createQueryBuilder();
         $queryBuilder
             ->select('*')
-            ->from('{{ relation }}', 'r')
-            ->innerJoin('r', '{{ relation }}_of_{{ model.name }}', 'mtm', 'r.{{ relation }}_id = mtm.{{ relation }}_id')
+            ->from('{{ relation_table }}', 'r')
+            ->innerJoin('r', '{{ relation_table }}_of_{{ model.name }}', 'mtm', 'r.{{ relation_table }}_id = mtm.{{ relation_table }}_id')
             ->where('mtm.{{ model.name }}_id = ?')
             ->setParameters([$this->getId()]);
         return self::$connection
             ->query($queryBuilder)
-            ->then(function(Result ${{ relation }}s) {
+            ->then(function(Result ${{ relation_table }}s) {
                 $items = [];
-                if (${{ relation }}s->fetchCount() > 0) {
-                    foreach (${{ relation }}s->fetchAllRows() as ${{ relation }}) {
-                        $items[] = (new {{ relation|db_to_camel }}())->populate(${{ relation }});
+                if (${{ relation_table }}s->fetchCount() > 0) {
+                    foreach (${{ relation_table }}s->fetchAllRows() as ${{ relation_table }}) {
+                        $items[] = (new {{ relation.table|db_to_camel }}())->populate(${{ relation_table }});
                     }
                 }
                 return $items;
             });
     }
 
-    public function add{{ relation|db_to_camel }}({{ relation|db_to_camel }} ${{ relation }}): PromiseInterface
+    public function add{{ relation_table|db_to_camel }}({{ relation.table|db_to_camel }} ${{ relation_table }}): PromiseInterface
     {
-        return self::$connection->insert('{{ relation }}_of_{{ model.name }}', [
-            '{{ relation }}_id' => ${{ relation }}->getId(),
+        return self::$connection->insert('{{ relation_table }}_of_{{ model.name }}', [
+            '{{ relation_table }}_id' => ${{ relation_table }}->getId(),
             '{{ model.name }}_id' => $this->getId(),
         ]);
     }
 
-    public function remove{{ relation|db_to_camel }}({{ relation|db_to_camel }} ${{ relation }}): PromiseInterface
+    public function remove{{ relation_table|db_to_camel }}({{ relation.table|db_to_camel }} ${{ relation_table }}): PromiseInterface
     {
-        return self::$connection->delete('{{ relation }}_of_{{ model.name }}', [
-            '{{ relation }}_id' => ${{ relation }}->getId(),
+        return self::$connection->delete('{{ relation_table }}_of_{{ model.name }}', [
+            '{{ relation_table }}_id' => ${{ relation_table }}->getId(),
             '{{ model.name }}_id' => $this->getId(),
         ]);
     }
 {% endfor %}
 {% endif %}
 {% if model.relations.one_to_many is not empty %}
+{% for relation in model.relations.one_to_many %}{% set relation_table = relation.name|default(relation.table) %}
 
-{% for relation in model.relations.one_to_many %}
-    public function get{{ relation|db_to_camel }}s(): PromiseInterface
+    public function get{{ relation_table|db_to_camel }}s(): PromiseInterface
     {
-        return (new {{ relation|db_to_camel }}())->findBy(['{{ model.name }}_id' => $this->getId()]);
+        return (new {{ relation.table|db_to_camel }}())->findBy(['{{ model.name }}_id' => $this->getId()]);
+    }
+
+    public function add{{ relation_table|db_to_camel }}({{ relation.table|db_to_camel }} ${{ relation_table }}): PromiseInterface
+    {
+        return ${{ relation_table }}->set{{ model.name|db_to_camel }}Id($this->getId())->flush();
     }
 {% endfor %}
 {% endif %}
 {% if model.relations.many_to_one is not empty %}
+{% for relation in model.relations.many_to_one %}{% set relation_table = relation.name|default(relation.table) %}
 
-{% for relation in model.relations.many_to_one %}
-    public function get{{ relation|db_to_camel }}(): PromiseInterface
+    public function get{{ relation_table|db_to_camel }}(): PromiseInterface
     {
-        return (new {{ relation|db_to_camel }}())->get($this->get{{ relation|db_to_camel }}Id());
+        return (new {{ relation.table|db_to_camel }}())->get($this->get{{ relation_table|db_to_camel }}Id());
     }
 
-    public function set{{ relation|db_to_camel }}({{ relation|db_to_camel }} ${{ relation }}): PromiseInterface
+    public function set{{ relation_table|db_to_camel }}({{ relation.table|db_to_camel }} ${{ relation_table }}): PromiseInterface
     {
-        $this->set{{ relation|db_to_camel }}Id(${{ relation }}->getId());
+        $this->set{{ relation.table|db_to_camel }}Id(${{ relation_table }}->getId());
     }
 {% endfor %}
 {% endif %}
