@@ -74,6 +74,7 @@ foreach (scandir($dbalDirectory) as $file) {
         continue;
     }
     $tableConfig = Yaml::parseFile($dbalDirectory . $file);
+    $tableConfig['index'] = $tableConfig['index'] ?? [];
     echo "Creating table {$tableConfig['name']}\n";
     $table = $schema->createTable($tableConfig['name']);
     if (!empty($tableConfig['relations']['many_to_one'])) {
@@ -82,6 +83,7 @@ foreach (scandir($dbalDirectory) as $file) {
             $column = $relationTable . '_id';
             if (empty($tableConfig['columns'][$column])) {
                 $tableConfig['columns'][$column] = ['type' => 'integer', 'options' => ['unsigned' => true]];
+                $tableConfig['index'][$column] = [$column];
             }
         }
     }
@@ -96,6 +98,10 @@ foreach (scandir($dbalDirectory) as $file) {
         $table->addUniqueIndex($unique);
     }
 
+    foreach ($tableConfig['index'] ?? [] as $index) {
+        $table->addIndex($index);
+    }
+
     if (!empty($tableConfig['relations']['many_to_one'])) {
         foreach ($tableConfig['relations']['many_to_one'] as $relation) {
             $relationTable = $relation['name'] ?? $relation['table'];
@@ -103,7 +109,6 @@ foreach (scandir($dbalDirectory) as $file) {
             $table->addForeignKeyConstraint($relation['table'], [$column], [$tableConfig['name'] . '_id']);
         }
     }
-
     // Check for many to many
     if (!empty($tableConfig['relations']['many_to_many'])) {
         foreach ($tableConfig['relations']['many_to_many'] as $relation) {
