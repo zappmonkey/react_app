@@ -6,7 +6,8 @@ use ReactApp\DBAL\Model;
 use Drift\DBAL\Result;
 use React\Promise\PromiseInterface;
 
-class {{ model.name|db_to_camel }} extends Model
+class {{ model.name|db_to_camel }} extends {{ model.extends|default('Model') }}{% if model.implements is not empty %} implements {{ model.implements|join(', ') }}{% endif %}
+
 {
     protected string $_table = '{{ model.name }}';
     protected string $_model = self::class;
@@ -18,7 +19,7 @@ class {{ model.name|db_to_camel }} extends Model
 
     public function __construct(?int $id = null)
     {
-        parent::__construct(json_decode('{{ model|json_encode|raw }}', true));
+        parent::__construct(json_decode('{{ model|json_encode|replace({'\\': '\\\\'})|raw }}', true));
         if ($id !== null) {
             $this->get($id);
         }
