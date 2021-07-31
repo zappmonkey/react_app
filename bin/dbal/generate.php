@@ -82,7 +82,7 @@ foreach (scandir($dbalDirectory) as $file) {
             $relationTable = $relation['name'] ?? $relation['table'];
             $column = $relationTable . '_id';
             if (empty($tableConfig['columns'][$column])) {
-                $tableConfig['columns'][$column] = ['type' => 'integer', 'options' => ['unsigned' => true]];
+                $tableConfig['columns'][$column] = ['type' => 'integer', 'options' => ['unsigned' => true, 'notnull' => false]];
                 $tableConfig['index'][$column] = [$column];
             }
         }
@@ -106,7 +106,7 @@ foreach (scandir($dbalDirectory) as $file) {
         foreach ($tableConfig['relations']['many_to_one'] as $relation) {
             $relationTable = $relation['name'] ?? $relation['table'];
             $column = $relationTable . '_id';
-            $table->addForeignKeyConstraint($relation['table'], [$column], [$tableConfig['name'] . '_id']);
+            $table->addForeignKeyConstraint($relation['table'], [$column], [$tableConfig['name'] . '_id'], ['notnull' => false]);
         }
     }
     // Check for many to many

@@ -111,9 +111,9 @@ class {{ model.name|db_to_camel }} extends {{ model.extends|default('Model') }}{
         return (new {{ relation.table|db_to_camel }}())->get($this->get{{ relation_table|db_to_camel }}Id());
     }
 
-    public function set{{ relation_table|db_to_camel }}({{ relation.table|db_to_camel }} ${{ relation_table }}): PromiseInterface
+    public function set{{ relation_table|db_to_camel }}({{ relation.table|db_to_camel }} ${{ relation_table }}): self
     {
-        $this->set{{ relation_table|db_to_camel }}Id(${{ relation_table }}->getId());
+        return $this->set{{ relation_table|db_to_camel }}Id(${{ relation_table }}->getId());
     }
 {% endfor %}
 {% endif %}
