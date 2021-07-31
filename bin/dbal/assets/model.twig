@@ -93,12 +93,12 @@ class {{ model.name|db_to_camel }} extends Model
 
     public function get{{ relation_table|db_to_camel }}s(): PromiseInterface
     {
-        return (new {{ relation.table|db_to_camel }}())->findBy(['{{ model.name }}_id' => $this->getId()]);
+        return (new {{ relation.table|db_to_camel }}())->findBy(['{{ relation.name|default(model.name) }}_id' => $this->getId()]);
     }
 
     public function add{{ relation_table|db_to_camel }}({{ relation.table|db_to_camel }} ${{ relation_table }}): PromiseInterface
     {
-        return ${{ relation_table }}->set{{ model.name|db_to_camel }}Id($this->getId())->flush();
+        return ${{ relation_table }}->set{{ relation.name|default(model.name)|db_to_camel }}Id($this->getId())->flush();
     }
 {% endfor %}
 {% endif %}
@@ -112,7 +112,7 @@ class {{ model.name|db_to_camel }} extends Model
 
     public function set{{ relation_table|db_to_camel }}({{ relation.table|db_to_camel }} ${{ relation_table }}): PromiseInterface
     {
-        $this->set{{ relation.table|db_to_camel }}Id(${{ relation_table }}->getId());
+        $this->set{{ relation_table|db_to_camel }}Id(${{ relation_table }}->getId());
     }
 {% endfor %}
 {% endif %}
