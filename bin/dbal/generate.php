@@ -172,6 +172,8 @@ function toPhpType(string $type)
             return 'int';
         case 'datetime':
             return '\DateTime';
+        case 'text':
+            return 'string';
     }
     return $type;
 }
@@ -182,6 +184,7 @@ function toDataType(string $type)
         case 'integer':
             return 'int';
         case 'datetime':
+        case 'text':
             return 'string';
     }
     return $type;

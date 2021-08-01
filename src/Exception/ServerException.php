@@ -37,6 +37,10 @@ class ServerException extends Exception implements \JsonSerializable
         int $code = 0,
         ?Throwable $previous = null
     ) {
+        if (!empty($message)) {
+            $this->title = $message;
+            $this->description = $message;
+        }
         parent::__construct($message, $code, $previous);
     }
 
