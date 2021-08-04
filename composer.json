@@ -16,7 +16,7 @@
         "monolog/monolog": "^2.3",
         "drift/dbal": "^0.1.2",
         "react/mysql": "^0.5.4",
-        "clue/reactphp-sqlite": "dev-master",
+        "clue/reactphp-sqlite": "dev-develop",
         "twig/twig": "^3.0",
         "ext-json": "*",
         "firebase/php-jwt": "^5.4"
