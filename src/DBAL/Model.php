@@ -40,7 +40,7 @@ abstract class Model implements \JsonSerializable
         if ($this->getId() === null) {
             return self::$connection->insert(
                 $this->_table,
-                $this->jsonSerialize()
+                $this->json()
             )->then(function(Result $result) {
                 $this->{reset($this->_structure['primary'])} = $result->getLastInsertedId();
                 return $this;
@@ -49,7 +49,7 @@ abstract class Model implements \JsonSerializable
         return self::$connection->update(
             $this->_table,
             [reset($this->_structure['primary']) => $this->getId()],
-            $this->jsonSerialize()
+            $this->json()
         )->then(function(Result $result) {
             return $this;
         });
@@ -131,15 +131,21 @@ abstract class Model implements \JsonSerializable
 
     public function jsonSerialize(): array
     {
+        return $this->json(false);
+    }
+
+    protected function json(bool $allowHidden = true): array
+    {
         $data = [];
         foreach ($this->_structure['columns'] as $column => $info) {
-            if (!isset($this->{$column})) {
+            if (!property_exists($this, $column) || (!$allowHidden && ($info['hidden'] ?? false)) || ($allowHidden && !isset($this->{$column}))) {
                 continue;
             }
-            if ($this->{$column} instanceof \DateTime) {
-                $data[$column] = $this->{$column}->format("Y-m-d H:i:s");
+            $value = $this->{$column} ?? null;
+            if ($value instanceof \DateTime) {
+                $data[$column] = $value->format("Y-m-d H:i:s");
             } else {
-                $data[$column] = $this->{$column};
+                $data[$column] = $value;
             }
         }
         return $data;
