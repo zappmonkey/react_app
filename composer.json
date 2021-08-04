@@ -24,7 +24,7 @@
     "repositories": [
         {
             "type": "vcs",
-            "url": "git@github.com:zappmonkey/reactphp-sqlite.git"
+            "url": "https://github.com/zappmonkey/reactphp-sqlite"
         }
     ],
     "autoload": {
