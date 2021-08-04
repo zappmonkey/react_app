@@ -9,6 +9,12 @@
             "email": "mark@zappmonkey.com"
         }
     ],
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "https://github.com/zappmonkey/reactphp-sqlite"
+        }
+    ],
     "require": {
         "react/react": "^1.2",
         "nikic/fast-route": "^1.3",
@@ -16,17 +22,11 @@
         "monolog/monolog": "^2.3",
         "drift/dbal": "^0.1.2",
         "react/mysql": "^0.5.4",
-        "clue/reactphp-sqlite": "dev-develop",
+        "clue/reactphp-sqlite": "9999999-dev",
         "twig/twig": "^3.0",
         "ext-json": "*",
         "firebase/php-jwt": "^5.4"
     },
-    "repositories": [
-        {
-            "type": "vcs",
-            "url": "https://github.com/zappmonkey/reactphp-sqlite"
-        }
-    ],
     "autoload": {
         "psr-4": {"ReactApp\\": "src/"}
     }
