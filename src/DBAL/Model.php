@@ -129,6 +129,20 @@ abstract class Model implements \JsonSerializable
             });
     }
 
+    public function getOptions(): array
+    {
+        $options = [];
+        foreach ($this->_structure['columns'] as $column => $info) {
+            if ($values = ($info['enum'] ?? false)) {
+                $options[$column] = [
+                    'values'  => $values,
+                    'default' => $info['options']['default'] ?? null,
+                ];
+            }
+        }
+        return $options;
+    }
+
     public function jsonSerialize(): array
     {
         return $this->json(false);

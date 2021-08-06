@@ -3,6 +3,7 @@
 namespace {{ namespace }};
 
 use ReactApp\DBAL\Model;
+use ReactApp\Exception\InvalidValue;
 use Drift\DBAL\Result;
 use React\Promise\PromiseInterface;
 
@@ -41,7 +42,10 @@ class {{ model.name|db_to_camel }} extends {{ model.extends|default('Model') }}{
 {% set nullable = (column == model.primary|first or (info.options.notnull is defined and info.options.notnull == false)) %}
     public function set{{ column|db_to_camel }}({% if nullable %}?{% endif %}{{ info.type|to_php_type }} ${{ column }}): self
     {
-        $this->{{ column }} = ${{ column }};
+        {% if info.enum is not empty %}if (!in_array(${{ column }}, [{% for option in info.enum %}'{{ option.value }}'{% if not loop.last %},{% endif %}{% endfor %}])) {
+            InvalidValue::throw('{{ column }}', ${{ column }});
+        }
+        {% endif %}$this->{{ column }} = ${{ column }};
         return $this;
     }
 {% endif %}
