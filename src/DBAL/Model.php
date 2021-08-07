@@ -5,6 +5,7 @@ namespace ReactApp\DBAL;
 use Drift\DBAL\Connection;
 use Drift\DBAL\Result;
 use React\Promise\PromiseInterface;
+use React\Promise\Deferred;
 
 abstract class Model implements \JsonSerializable
 {
@@ -19,15 +20,16 @@ abstract class Model implements \JsonSerializable
 
     abstract public function getId(): ?int;
 
-    public function get(int $id): PromiseInterface
+    public function get(?int $id): PromiseInterface
     {
+        $id = $id ?? 0;
         return self::$connection
             ->findOneBy($this->_table, [
                 reset($this->_structure['primary']) => $id
             ])
             ->then(function(?array $result) use ($id) {
                 if (is_null($result)) {
-                    throw new \Exception(sprintf("%s not found with #%s", $this->_table, $id));
+                    return null;
                 } else {
                     $this->populate($result);
                 }

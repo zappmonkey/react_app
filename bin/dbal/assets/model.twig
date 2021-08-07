@@ -78,7 +78,10 @@ class {{ model.name|db_to_camel }} extends {{ model.extends|default('Model') }}{
 
     public function add{{ relation_table|db_to_camel }}({{ relation.table|db_to_camel }} ${{ relation_table }}): PromiseInterface
     {
-        return self::$connection->insert('{{ relation_table }}_of_{{ model.name }}', [
+        return self::$connection->upsert('{{ relation_table }}_of_{{ model.name }}', [
+            '{{ relation_table }}_id' => ${{ relation_table }}->getId(),
+            '{{ model.name }}_id' => $this->getId(),
+        ],[
             '{{ relation_table }}_id' => ${{ relation_table }}->getId(),
             '{{ model.name }}_id' => $this->getId(),
         ]);
