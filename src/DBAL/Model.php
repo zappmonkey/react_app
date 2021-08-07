@@ -2,6 +2,7 @@
 
 namespace ReactApp\DBAL;
 
+use Doctrine\DBAL\Query\QueryBuilder;
 use Drift\DBAL\Connection;
 use Drift\DBAL\Result;
 use React\Promise\PromiseInterface;
@@ -112,12 +113,21 @@ abstract class Model implements \JsonSerializable
         return $this;
     }
 
-    public function list()
+    public function list(array $where, ?int $page = null, ?int $limit = null)
     {
         $queryBuilder = self::$connection->createQueryBuilder();
         $queryBuilder
             ->select('*')
             ->from($this->_table, 'm');
+        $this->applyWhere($queryBuilder, $where);
+        if ($limit !== null) {
+            $page = ($page ?? 1) - 1;
+            if ($page < 0) {
+                $page = 0;
+            }
+            $queryBuilder->setFirstResult($page * $limit);
+            $queryBuilder->setMaxResults($limit);
+        }
         return self::$connection
             ->query($queryBuilder)
             ->then(function(Result $results) {
@@ -129,6 +139,32 @@ abstract class Model implements \JsonSerializable
                 }
                 return $items;
             });
+    }
+
+    private function applyWhere(
+        QueryBuilder $queryBuilder,
+        array $array
+    ) {
+        if (empty($array)) {
+            return;
+        }
+        $params = $queryBuilder->getParameters();
+        foreach ($array as $field => $value) {
+            if (\is_null($value)) {
+                $queryBuilder->andWhere(
+                    $queryBuilder->expr()->isNull($field)
+                );
+                continue;
+            }
+
+            $queryBuilder->andWhere(
+                $queryBuilder->expr()->eq($field, '?')
+            );
+
+            $params[] = $value;
+        }
+
+        $queryBuilder->setParameters($params);
     }
 
     public function getOptions(): array
