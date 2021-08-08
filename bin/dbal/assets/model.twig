@@ -60,7 +60,7 @@ class {{ model.name|db_to_camel }} extends {{ model.extends|default('Model') }}{
         $queryBuilder
             ->select('*')
             ->from('{{ relation_table }}', 'r')
-            ->innerJoin('r', '{{ relation_table }}_of_{{ model.name }}', 'mtm', 'r.{{ relation_table }}_id = mtm.{{ relation_table }}_id')
+            ->innerJoin('r', '{{ many_to_many }}', 'mtm', 'r.{{ relation_table }}_id = mtm.{{ relation_table }}_id')
             ->where('mtm.{{ model.name }}_id = ?')
             ->setParameters([$this->getId()]);
         return self::$connection
@@ -78,7 +78,7 @@ class {{ model.name|db_to_camel }} extends {{ model.extends|default('Model') }}{
 
     public function add{{ relation_table|db_to_camel }}({{ relation.table|db_to_camel }} ${{ relation_table }}): PromiseInterface
     {
-        return self::$connection->upsert('{{ relation_table }}_of_{{ model.name }}', [
+        return self::$connection->upsert('{{ many_to_many }}', [
             '{{ relation_table }}_id' => ${{ relation_table }}->getId(),
             '{{ model.name }}_id' => $this->getId(),
         ],[
@@ -89,7 +89,7 @@ class {{ model.name|db_to_camel }} extends {{ model.extends|default('Model') }}{
 
     public function remove{{ relation_table|db_to_camel }}({{ relation.table|db_to_camel }} ${{ relation_table }}): PromiseInterface
     {
-        return self::$connection->delete('{{ relation_table }}_of_{{ model.name }}', [
+        return self::$connection->delete('{{ many_to_many }}', [
             '{{ relation_table }}_id' => ${{ relation_table }}->getId(),
             '{{ model.name }}_id' => $this->getId(),
         ]);

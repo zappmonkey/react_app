@@ -113,7 +113,7 @@ abstract class Model implements \JsonSerializable
         return $this;
     }
 
-    public function list(array $where, ?int $page = null, ?int $limit = null)
+    public function list(array $where = [], ?int $page = null, ?int $limit = null)
     {
         $queryBuilder = self::$connection->createQueryBuilder();
         $queryBuilder
