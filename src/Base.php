@@ -6,8 +6,8 @@ use Drift\DBAL\Connection;
 use Psr\Container\ContainerInterface;
 use Psr\Log\LoggerInterface;
 use React\EventLoop\LoopInterface;
-use React\Socket\Server as SocketServer;
-use React\Http\Server;
+use React\Http\HttpServer;
+use React\Socket\SocketServer;
 use React\EventLoop\Loop;
 use FastRoute\Dispatcher\GroupCountBased;
 use ReactApp\DBAL\DBAL;
@@ -20,6 +20,8 @@ class Base
     private Routes $routes;
     private ContainerInterface $container;
     private DBAL $dbal;
+    private $host = "127.0.0.1";
+    private $port = "8000";
 
     /**
      * Base constructor.
@@ -155,10 +157,42 @@ class Base
         return $this->container;
     }
 
+    /**
+     * @return string
+     */
+    public function getHost(): string
+    {
+        return $this->host;
+    }
+
+    /**
+     * @param string $host
+     */
+    public function setHost(string $host): void
+    {
+        $this->host = $host;
+    }
+
+    /**
+     * @return string
+     */
+    public function getPort(): string
+    {
+        return $this->port;
+    }
+
+    /**
+     * @param string $port
+     */
+    public function setPort(string $port): void
+    {
+        $this->port = $port;
+    }
+
     public function run()
     {
-        $server = new Server(new Router(new GroupCountBased($this->routes->routes()->getData())));
-        $socket = new SocketServer('127.0.0.1:8000', $this->loop);
+        $server = new HttpServer(new Router(new GroupCountBased($this->routes->routes()->getData())));
+        $socket = new SocketServer($this->getHost() . ':' . $this->getPort(), [], $this->loop);
         $server->on('error', function (\Throwable $e)
         {
             $this->container->get(LoggerInterface::class)->error($e->getMessage(), $e->getTrace());
