@@ -4,7 +4,7 @@ namespace ReactApp\DBAL;
 
 use Doctrine\DBAL\Platforms\AbstractPlatform;
 use Doctrine\DBAL\Platforms\MySqlPlatform;
-use Doctrine\DBAL\Platforms\SQLitePlatform;
+use Doctrine\DBAL\Platforms\SqlitePlatform;
 use Drift\DBAL\Connection;
 use Drift\DBAL\Driver\Mysql\MysqlDriver;
 use Drift\DBAL\Driver\SQLite\SQLiteDriver;
