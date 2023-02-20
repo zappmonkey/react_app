@@ -85,7 +85,7 @@ class ServerException extends Exception implements \JsonSerializable
         return new Response($this->getCode(), ['Content-Type' => 'application/json'], json_encode($this));
     }
 
-    public function jsonSerialize()
+    public function jsonSerialize(): mixed
     {
         return [
             'code' => $this->getCode(),

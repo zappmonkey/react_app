@@ -6,6 +6,7 @@ use Doctrine\DBAL\Platforms\AbstractPlatform;
 use Doctrine\DBAL\Platforms\MySQLPlatform;
 use Doctrine\DBAL\Platforms\SqlitePlatform;
 use Drift\DBAL\Connection;
+use Drift\DBAL\ConnectionPool;
 use Drift\DBAL\Driver\Mysql\MysqlDriver;
 use Drift\DBAL\Driver\SQLite\SQLiteDriver;
 use Drift\DBAL\Credentials;
@@ -42,7 +43,7 @@ class DBAL
                 $driver = new MysqlDriver(self::$loop);
         }
         $credentials = new Credentials(...$config->get());
-        self::$connection = Connection::createConnected(
+        self::$connection = ConnectionPool::createConnected(
             $driver,
             $credentials,
             $platform
@@ -67,7 +68,7 @@ class DBAL
                 'test',
             );
 
-            self::$connection = Connection::createConnected(
+            self::$connection = ConnectionPool::createConnected(
                 $mysqlDriver,
                 $credentials,
                 $mysqlPlatform

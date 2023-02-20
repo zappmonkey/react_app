@@ -43,18 +43,18 @@ abstract class Model implements \JsonSerializable
         if ($this->getId() === null) {
             return self::$connection->insert(
                 $this->_table,
-                $this->json()
+                $this->json(true, true)
             )->then(function(Result $result) {
                 $this->{reset($this->_structure['primary'])} = $result->getLastInsertedId();
-                return $this;
+                return $this->get($result->getLastInsertedId());
             });
         }
         return self::$connection->update(
             $this->_table,
             [reset($this->_structure['primary']) => $this->getId()],
-            $this->json()
+            $this->json(true, true)
         )->then(function(Result $result) {
-            return $this;
+            return $this->get($this->getId());
         });
     }
 
@@ -181,12 +181,12 @@ abstract class Model implements \JsonSerializable
         return $options;
     }
 
-    public function jsonSerialize(): array
+    public function jsonSerialize(): mixed
     {
         return $this->json(false);
     }
 
-    protected function json(bool $allowHidden = true): array
+    protected function json(bool $allowHidden = true, bool $forFlush = false): array
     {
         $data = [];
         foreach ($this->_structure['columns'] as $column => $info) {
@@ -199,6 +199,9 @@ abstract class Model implements \JsonSerializable
             } else {
                 $data[$column] = $value;
             }
+        }
+        if ($forFlush && ($this->_structure['columns']['modified'] ?? false) && !empty($value)) {
+            $data['modified'] = date('Y-m-d H:i:s');
         }
         return $data;
     }
